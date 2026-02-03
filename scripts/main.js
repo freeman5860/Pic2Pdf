@@ -139,7 +139,7 @@ const compressImage = async (file) => {
   }
 };
 
-const addImageToPdf = async (pdfDoc, page, imageBytes, orientation, margin, size) => {
+const addImageToPdf = async (pdfDoc, page, imageBytes, margin) => {
   let embeddedImage;
   if (imageBytes.type?.includes('png')) {
     embeddedImage = await pdfDoc.embedPng(imageBytes.data);
@@ -150,8 +150,8 @@ const addImageToPdf = async (pdfDoc, page, imageBytes, orientation, margin, size
   }
 
   const { width, height } = embeddedImage.scale(1);
-  const pageWidth = orientation === 'portrait' ? size.width : size.height;
-  const pageHeight = orientation === 'portrait' ? size.height : size.width;
+  const pageWidth = page.getWidth();
+  const pageHeight = page.getHeight();
 
   const availableWidth = pageWidth - margin * 2;
   const availableHeight = pageHeight - margin * 2;
@@ -188,16 +188,13 @@ const generatePdf = async () => {
     const compressed = await compressImage(file);
     const dataUrl = await readFileAsDataURL(compressed);
     const bytes = await fetch(dataUrl).then((res) => res.arrayBuffer());
- 
-    const page = pdfDoc.addPage([pageSize.width, pageSize.height]);
-    await addImageToPdf(
-      pdfDoc,
-      page,
-      { data: bytes, type: file.type },
-      orientation,
-      margin,
-      pageSize
-    );
+
+    const pageDimensions =
+      orientation === 'portrait'
+        ? [pageSize.width, pageSize.height]
+        : [pageSize.height, pageSize.width];
+    const page = pdfDoc.addPage(pageDimensions);
+    await addImageToPdf(pdfDoc, page, { data: bytes, type: file.type }, margin);
   }
 
   const pdfBytes = await pdfDoc.save();
