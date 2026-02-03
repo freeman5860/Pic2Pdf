@@ -198,7 +198,9 @@ const generatePdf = async () => {
   }
 
   const pdfBytes = await pdfDoc.save();
-  downloadBlob(pdfBytes, `Pic2Pdf-${new Date().toISOString().split('T')[0]}.pdf`);
+  const filename = `Pic2Pdf-${new Date().toISOString().split('T')[0]}.pdf`;
+  downloadBlob(pdfBytes, filename);
+  renderPreview(pdfBytes);
 };
 
 const downloadBlob = (bytes, filename) => {
@@ -208,6 +210,22 @@ const downloadBlob = (bytes, filename) => {
   link.download = filename;
   link.click();
   URL.revokeObjectURL(link.href);
+};
+
+const renderPreview = (bytes) => {
+  const previewFrame = document.getElementById('previewFrame');
+  const placeholder = document.querySelector('.preview-placeholder');
+  if (!previewFrame) return;
+
+  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  previewFrame.style.display = 'block';
+  if (placeholder) placeholder.style.display = 'none';
+  previewFrame.src = url;
+
+  previewFrame.onload = () => {
+    setTimeout(() => URL.revokeObjectURL(url), 1000 * 60);
+  };
 };
 
 const setup = () => {

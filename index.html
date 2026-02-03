@@ -31,7 +31,10 @@
       <div class="hero__preview" aria-hidden="true">
         <div class="preview-card">
           <span>PDF 预览</span>
-          <div class="preview-card__page"></div>
+          <div class="preview-card__page" id="previewPage">
+            <p class="preview-placeholder">生成后自动预览第一页</p>
+            <iframe id="previewFrame" title="PDF preview" loading="lazy"></iframe>
+          </div>
         </div>
       </div>
     </header>
